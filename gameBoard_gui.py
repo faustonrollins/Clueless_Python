@@ -3,21 +3,18 @@ from tkinter import *
 from PIL import Image, ImageTk
 import Clueless
 
-################# Development ####################
-# Pull data from the Clueless file
+# Pull data from the Clueless.py
+# When the GUI starts, the import function instantiates a Clueless object
 gameLogic = Clueless
-# gameLogic.deal_cards()
-caseFile = Clueless.case_file
-playerDecks = Clueless.player_decks
-commonCard = Clueless.common_cards
-#################################################
-
+caseFile = Clueless.case_file   # Case file
+playerDecks = Clueless.player_decks # Player hands
+commonCard = Clueless.common_cards # Common cards
 
 # Create object 
 root = Tk()
   
 # Adjust size 
-root.geometry("1700x900")
+root.geometry("1700x900")   #Increase size from 1400x900. Can be changed back once the game logic texts are broken up into smaller pieces
   
 # Add image file
 filename = "board.png"
@@ -46,21 +43,21 @@ button3 = Button( root, text = "Left",height = 3, width=5)
 button4 = Button( root, text = "Right",height = 3, width=5)
 
 gamePlay_log  = Text(root, width = 75, height = 40, takefocus=0)
-
+# Insert text for the Case File
 gamePlay_log.insert("1.0", "CASE FILE\n")
 textLineNum=2
 for i in caseFile:
     gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
     textLineNum += 1
-
+# Insert text for the player decks
 gamePlay_log.insert(str(textLineNum)+".0", "\nPLAYER DECKS\n")
 textLineNum +=2
 for i in playerDecks:
     gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(playerDecks[i])))
     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
     textLineNum += 1
-
+# Insert text for the common cards
 gamePlay_log.insert(str(textLineNum)+".0", "\nCOMMON CARDS\n")
 textLineNum +=2
 for i in commonCard:
