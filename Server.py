@@ -95,7 +95,10 @@ while True:
             # Also save username and username header
             clients[client_socket] = user
 
-            print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
+            client_message = 'Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8'))
+            print(client_message)
+            with open('readme.txt', 'w') as f:
+                f.write(client_message)
 
         # Else existing socket is sending a message
         else:
@@ -118,7 +121,12 @@ while True:
             # Get user by notified socket, so we will know who sent the message
             user = clients[notified_socket]
 
-            print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            # print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            client_message = f'{user["data"].decode("utf-8")} : {message["data"].decode("utf-8")}'
+            
+            print(client_message)
+            with open('readme.txt', 'w') as f:
+                f.write(client_message)
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:
