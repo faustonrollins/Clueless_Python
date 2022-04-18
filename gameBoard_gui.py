@@ -1,7 +1,9 @@
 # Import module 
+from glob import glob
 from tkinter import *
 from PIL import Image, ImageTk
 import Clueless
+# import tkinter as tk      // Uncomment this to use tk.END
 
 # Pull data from the Clueless.py
 # When the GUI starts, the import function instantiates a Clueless object
@@ -44,17 +46,21 @@ canvas1.create_image(400, 200, image = bg,
 #         else:
 #             print('\t' * (indent+1) + str(value))
 
-
+textBoxLineNum = 1   # Initial line number for text box
 def playerDeckLogs():
+    global textBoxLineNum
     print("Herro")
-    gamePlay_log.insert(str(2)+".0", "\nPLAYER DECKS\n")
+    # gamePlay_log.delete("1.0", tk.END)
     # Insert text for the player decks
-    textLineNum=2
-    gamePlay_log.insert(str(textLineNum)+".0", "\nPLAYER DECKS\n")
+    # gamePlay_log.insert(str(textBoxLineNum)+".0", "\nPLAYER DECKS\n")
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "PLAYER DECKS\n")
+    textBoxLineNum += 1
     for i in playerDecks:
-        gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(playerDecks[i])))
-        gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-        textLineNum += 1
+        gamePlay_log.insert(str(textBoxLineNum)+".0", (str(i) + ": " + str(playerDecks[i])))
+        gamePlay_log.insert(str(textBoxLineNum+1)+".0","\n")
+        textBoxLineNum += 1
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "\n")
+    textBoxLineNum += 1
 
 gamePlay_log  = Text(root, width = 75, height = 40, takefocus=0)
 gamePlay_log_canvas = canvas1.create_window( 1650, 10, anchor = "ne",
@@ -71,20 +77,20 @@ button4 = Button( root, text = "Right",height = 3, width=5)
 
 # # Insert text for the Case File
 # gamePlay_log.insert("1.0", "CASE FILE\n")
-# textLineNum=2
+# textBoxLineNum=2
 # for i in caseFile:
-#     gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
-#     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-#     textLineNum += 1
+#     gamePlay_log.insert(str(textBoxLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
+#     gamePlay_log.insert(str(textBoxLineNum+1)+".0","\n")
+#     textBoxLineNum += 1
 
 
 # # Insert text for the common cards
-# gamePlay_log.insert(str(textLineNum)+".0", "\nCOMMON CARDS\n")
-# textLineNum +=2
+# gamePlay_log.insert(str(textBoxLineNum)+".0", "\nCOMMON CARDS\n")
+# textBoxLineNum +=2
 # for i in commonCard:
-#     gamePlay_log.insert(str(textLineNum)+".0", (str(i)))
-#     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-#     textLineNum += 1
+#     gamePlay_log.insert(str(textBoxLineNum)+".0", (str(i)))
+#     gamePlay_log.insert(str(textBoxLineNum+1)+".0","\n")
+#     textBoxLineNum += 1
 
 chat_log  = Text(root, width = 30, height = 40, takefocus=0)
 label1 = Label(root, text="PLAYER 1", borderwidth=1, relief="solid", height=3, width=20)
