@@ -95,7 +95,7 @@ while True:
             # Also save username and username header
             clients[client_socket] = user
 
-            client_message = 'Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8'))
+            client_message = 'New Player -> {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8'))
             print(client_message)
             with open('readme.txt', 'w') as f:
                 f.write(client_message)

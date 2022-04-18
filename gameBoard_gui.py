@@ -1,5 +1,6 @@
 # Import module 
 from asyncore import read
+from faulthandler import disable
 from glob import glob
 from tkinter import *
 from PIL import Image, ImageTk
@@ -46,10 +47,6 @@ canvas1.pack(fill = "both", expand = True)
 textBoxLineNum = 1   # Initial line number for text box
 def playerDeckLogs():
     global textBoxLineNum
-    print("Herro")
-    # gamePlay_log.delete("1.0", tk.END)
-    # Insert text for the player decks
-    # gamePlay_log.insert(str(textBoxLineNum)+".0", "\nPLAYER DECKS\n")
     gamePlay_log.insert(str(textBoxLineNum)+".0", "PLAYER DECKS\n")
     textBoxLineNum += 1
     for i in playerDecks:
@@ -58,6 +55,31 @@ def playerDeckLogs():
         textBoxLineNum += 1
     gamePlay_log.insert(str(textBoxLineNum)+".0", "\n")
     textBoxLineNum += 1
+
+
+def commonCards():
+    global textBoxLineNum
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "COMMON CARDS\n")
+    textBoxLineNum += 1
+    for i in range(0, len(commonCard)):
+        gamePlay_log.insert(str(textBoxLineNum)+".0", (str(i) + ": " + str(commonCard[i])))
+        gamePlay_log.insert(str(textBoxLineNum+1)+".0","\n")
+        textBoxLineNum += 1
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "\n")
+    textBoxLineNum += 1
+
+
+def caseFiles():
+    global textBoxLineNum
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "CASE FILE\n")
+    textBoxLineNum += 1
+    for i in caseFile:
+        gamePlay_log.insert(str(textBoxLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
+        gamePlay_log.insert(str(textBoxLineNum+1)+".0","\n")
+        textBoxLineNum += 1
+    gamePlay_log.insert(str(textBoxLineNum)+".0", "\n")
+    textBoxLineNum += 1
+
 
 def gameChatRoom():
     global chatRoomMessage
@@ -79,32 +101,32 @@ def refreshChat():
     root.after(1000, refreshChat) # every second...
 
 # Create Buttons
-button1 = Button( root, text = "Up", height = 3, width=5, command = playerDeckLogs)
-button2 = Button( root, text = "Down",height = 3, width=5)
-button3 = Button( root, text = "Left",height = 3, width=5)
-button4 = Button( root, text = "Right",height = 3, width=5)
+button1 = Button( root, text = "Player Decks", height = 4, width=14, command = playerDeckLogs)
+button2 = Button( root, text = "Common Cards",height = 4, width=14, command=commonCards)
+button3 = Button( root, text = "Case Files",height = 4, width=14, command=caseFiles)
+button4 = Button( root, text = "Accusation",height = 4, width=14, state=DISABLED)
 
 
 label1 = Label(root, text="PLAYER 1", borderwidth=1, relief="solid", height=3, width=20)
 label2 = Label(root, text="PLAYER 2", borderwidth=0, relief="solid", height=3, width=20)
 label3 =  Label(root, text="PLAYER 3", borderwidth=0, relief="solid", height=3, width=20)
 
-gamePlay_log  = Text(root, width = 50, height = 40, takefocus=0)
-chat_log  = Text(root, width = 50, height = 40, takefocus=0)
+gamePlay_log  = Text(root, width = 50, height = 38, takefocus=0)
+chat_log  = Text(root, width = 50, height = 38, takefocus=0)
   
 # Display Buttons
 button1_canvas = canvas1.create_window( 50, 700, 
                                        anchor = "nw",
                                        window = button1)
   
-button2_canvas = canvas1.create_window( 50, 770,
+button2_canvas = canvas1.create_window( 50, 790,
                                        anchor = "nw",
                                        window = button2)
   
-button3_canvas = canvas1.create_window( 100, 700, anchor = "nw",
+button3_canvas = canvas1.create_window( 175, 700, anchor = "nw",
                                        window = button3)
 
-button4_canvas = canvas1.create_window( 100, 770, anchor = "nw",
+button4_canvas = canvas1.create_window( 175, 790, anchor = "nw",
                                        window = button4)
 
 
@@ -127,7 +149,7 @@ label2_canvas = canvas1.create_window( 1000, 30, anchor = "nw",
 canvas1.create_image(525, 100, image = bg, 
                      anchor = "nw")
 
-canvas1.create_image(1200, 700, image = deck_bg, 
+canvas1.create_image(1200, 650, image = deck_bg, 
                      anchor = "nw")
 
 
@@ -145,22 +167,3 @@ if __name__ == "__main__":
 gameChatRoom()
 refreshChat() 
 root.mainloop()
-
-
-# Josh: Heroo
-
-# Melissa: Sup?
-
-# Fauston: Hey guys!
-
-# Logan: nice work!
-
-# {client:
-# 	{move: left,
-# 		{
-# 		...
-# 		...
-# 		...
-# 		}
-# 	}
-# }
