@@ -3,8 +3,7 @@ from glob import glob
 from tkinter import *
 from PIL import Image, ImageTk
 import Clueless
-from Server import ClueServer
-
+import threading
 
 # import tkinter as tk      // Uncomment this to use tk.END
 # Pull data from the Clueless.py
@@ -131,7 +130,14 @@ label2_canvas = canvas1.create_window( 600, 30, anchor = "nw",
 label2_canvas = canvas1.create_window( 800, 30, anchor = "nw",
                                        window = label3)
 
-
+# Starting a new thread for the Server
+def startServer():
+    print("Starting server")
+    import Server
+if __name__ == "__main__":
+    print("Starting a new thread for the Server")
+    t1 = threading.Thread(target=startServer, name='t1', daemon=True)
+    t1.start()
     
 root.mainloop()
 
