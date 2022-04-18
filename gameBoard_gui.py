@@ -3,14 +3,18 @@ from glob import glob
 from tkinter import *
 from PIL import Image, ImageTk
 import Clueless
-# import tkinter as tk      // Uncomment this to use tk.END
+from Server import ClueServer
 
+
+# import tkinter as tk      // Uncomment this to use tk.END
 # Pull data from the Clueless.py
 # When the GUI starts, the import function instantiates a Clueless object
 gameLogic = Clueless
 caseFile = Clueless.case_file   # Case file
 playerDecks = Clueless.player_decks # Player hands
 commonCard = Clueless.common_cards # Common cards
+
+
 
 # Create object 
 root = Tk()
@@ -113,8 +117,6 @@ button3_canvas = canvas1.create_window( 100, 700, anchor = "nw",
 
 button4_canvas = canvas1.create_window( 100, 770, anchor = "nw",
                                        window = button4)
-
-
 
 
 chat_log_canvas = canvas1.create_window( 100, 10, anchor = "nw",
