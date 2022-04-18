@@ -95,9 +95,9 @@ def refreshChat():
     with open('readme.txt') as f: 
         lines = f.readlines()[0] + "\n"
     if chatRoomMessage != lines:
-        chat_log.insert(str(chatLine) +".0", lines)
+        chat_log.insert(str(chatLine) +".0", lines + "\n")
         chatRoomMessage = lines
-        chatLine += 2
+        chatLine += 3
     root.after(1000, refreshChat) # every second...
 
 # Create Buttons
