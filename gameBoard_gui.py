@@ -36,34 +36,55 @@ canvas1.create_image(400, 200, image = bg,
 # Add Text
 # canvas1.create_text( 200, 850, text = "Welcome")
   
+# def pretty(d, indent=0):
+#     for key, value in d.items():
+#         print('\t' * indent + str(key))
+#         if isinstance(value, dict):
+#             pretty(value, indent+1)
+#         else:
+#             print('\t' * (indent+1) + str(value))
+
+
+def playerDeckLogs():
+    print("Herro")
+    gamePlay_log.insert(str(2)+".0", "\nPLAYER DECKS\n")
+    # Insert text for the player decks
+    textLineNum=2
+    gamePlay_log.insert(str(textLineNum)+".0", "\nPLAYER DECKS\n")
+    for i in playerDecks:
+        gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(playerDecks[i])))
+        gamePlay_log.insert(str(textLineNum+1)+".0","\n")
+        textLineNum += 1
+
+gamePlay_log  = Text(root, width = 75, height = 40, takefocus=0)
+gamePlay_log_canvas = canvas1.create_window( 1650, 10, anchor = "ne",
+                                       window = gamePlay_log)
+# gamePlay_log.config(state=DISABLED)     #Make the Text box read-only
+
 # Create Buttons
-button1 = Button( root, text = "Up", height = 3, width=5)
+button1 = Button( root, text = "Up", height = 3, width=5, command = playerDeckLogs)
 button2 = Button( root, text = "Down",height = 3, width=5)
 button3 = Button( root, text = "Left",height = 3, width=5)
 button4 = Button( root, text = "Right",height = 3, width=5)
 
-gamePlay_log  = Text(root, width = 75, height = 40, takefocus=0)
-# Insert text for the Case File
-gamePlay_log.insert("1.0", "CASE FILE\n")
-textLineNum=2
-for i in caseFile:
-    gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
-    gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-    textLineNum += 1
-# Insert text for the player decks
-gamePlay_log.insert(str(textLineNum)+".0", "\nPLAYER DECKS\n")
-textLineNum +=2
-for i in playerDecks:
-    gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(playerDecks[i])))
-    gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-    textLineNum += 1
-# Insert text for the common cards
-gamePlay_log.insert(str(textLineNum)+".0", "\nCOMMON CARDS\n")
-textLineNum +=2
-for i in commonCard:
-    gamePlay_log.insert(str(textLineNum)+".0", (str(i)))
-    gamePlay_log.insert(str(textLineNum+1)+".0","\n")
-    textLineNum += 1
+
+
+# # Insert text for the Case File
+# gamePlay_log.insert("1.0", "CASE FILE\n")
+# textLineNum=2
+# for i in caseFile:
+#     gamePlay_log.insert(str(textLineNum)+".0", (str(i) + ": " + str(caseFile[i])))
+#     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
+#     textLineNum += 1
+
+
+# # Insert text for the common cards
+# gamePlay_log.insert(str(textLineNum)+".0", "\nCOMMON CARDS\n")
+# textLineNum +=2
+# for i in commonCard:
+#     gamePlay_log.insert(str(textLineNum)+".0", (str(i)))
+#     gamePlay_log.insert(str(textLineNum+1)+".0","\n")
+#     textLineNum += 1
 
 chat_log  = Text(root, width = 30, height = 40, takefocus=0)
 label1 = Label(root, text="PLAYER 1", borderwidth=1, relief="solid", height=3, width=20)
@@ -87,9 +108,7 @@ button3_canvas = canvas1.create_window( 100, 700, anchor = "nw",
 button4_canvas = canvas1.create_window( 100, 770, anchor = "nw",
                                        window = button4)
 
-gamePlay_log_canvas = canvas1.create_window( 1650, 10, anchor = "ne",
-                                       window = gamePlay_log)
-gamePlay_log.config(state=DISABLED)     #Make the Text box read-only
+
 
 
 chat_log_canvas = canvas1.create_window( 100, 10, anchor = "nw",
@@ -103,7 +122,9 @@ label2_canvas = canvas1.create_window( 600, 30, anchor = "nw",
 
 label2_canvas = canvas1.create_window( 800, 30, anchor = "nw",
                                        window = label3)
-# Execute tk
+
+
+    
 root.mainloop()
 
 
