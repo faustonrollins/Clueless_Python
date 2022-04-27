@@ -94,5 +94,9 @@ def main_game():
     #while player hasn't won:
         #next players turn
 
-#print(map)
-main_game()
+# <<<<<<< ls_socketmsgs
+# #print(map)
+# main_game()
+# =======
+# print(map)
+# >>>>>>> main
