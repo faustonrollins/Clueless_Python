@@ -50,6 +50,7 @@ case_file = {}
 player_decks = {}
 common_cards = []
 
+
 def deal_cards():
     #initialize empty decks
     for i in range(0, len(usernames)):
@@ -93,4 +94,9 @@ def main_game():
     #while player hasn't won:
         #next players turn
 
-print(map)
+# <<<<<<< ls_socketmsgs
+# #print(map)
+# main_game()
+# =======
+# print(map)
+# >>>>>>> main
