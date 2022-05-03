@@ -91,8 +91,8 @@ def initialize_game():
         
 def main_game():
     initialize_game()
-    #while player hasn't won:
-        #next players turn
+    while player hasn't won:
+        next players turn
 
 # <<<<<<< ls_socketmsgs
 # #print(map)
