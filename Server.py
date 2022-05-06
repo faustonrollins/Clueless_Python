@@ -1,148 +1,323 @@
+#!/usr/bin/env python3
+"""
+Detectives today started sifting the evidences at the Tudor Hall, home of the late Dr.Black who was found
+murdered last Thursday evening. A number of suspects - guests of Dr.Black - are being questioned. A collection of items
+said to be the possible murder weapons have been found too.
+
+The idea of Cluedo is to move from room to room to eliminate people, places, and weapons.
+The player who correctly accuses Who, What, and Where wins.
+Note: You can only enter in a room when your points are 8 or more than 8.
+Author: Kartikay Chiranjeev Gupta
+Last Date of modification: 20/6/2021
+"""
+
 import socket
-import select
+import re
+import random
+import sys
+import time
+import itertools
 
-HEADER_LENGTH = 10
+players = []
+nicknames = []
+members = {}
+players_deck = {}
+player_point = {}
+secret_deck = {}
+valid_name_pattern = r'[A-Za-z0-9-_]*'
+game_art1 = '''
+==================================================================
+Welcome to the classic detective game: 
+==================================================================
+'''
+game_art2 = '''
+ .d8888b.     888                                 888              
+d88P  Y88b    888                                 888              
+888    888    888                                 888             
+888           888    888  888     .d88b.      .d88888     .d88b.  
+888           888    888  888    d8P  Y8b    d88" 888    d88""88b 
+888    888    888    888  888    88888888    888  888    888  888 
+Y88b  d88P    888    Y88b 888    Y8b.        Y88b 888    Y88..88P 
+ "Y8888P"     888     "Y88888     "Y8888      "Y88888     "Y88P" 
+ '''
+game_art3 = '''
+==================================================================
+Let the investigation begin...
+==================================================================
+ 
+'''
+option_table = """  
+================================================
+||........Suspects.......||......Weapons......||
+||  1.) Colonel Mustard  ||  1.) Dagger       ||
+||  2.) Professor Plum   ||  2.) Candlestick  ||
+||  3.) Reverend Green   ||  3.) Revolver     ||
+||  4.) Mrs. Peacock     ||  4.) Rope         ||
+||  5.) Miss Scarlett    ||  5.) Lead piping  ||
+||  6.) Mrs. White       ||  6.) Spanner      ||
+================================================
+"""
+room_table = """  
+=========================
+||........Rooms........||
+||  1.) Hall           ||
+||  2.) Lounge         ||
+||  3.) Library        ||
+||  4.) Kitchen        ||
+||  5.) Billiard Room  ||
+||  6.) Study          ||
+=========================
+"""
+suggestion = '''
+--------------
+| Killer: {} |
+| Weapon: {} |
+| Place : {} |
+-------------- 
+'''
+cards = [["Colonel Mustard", "Professor Plum", "Reverend Green", "Mrs. Peacock", "Mrs. White", "Miss Scarlett"],
+         ["Dagger", "Candlestick", "Revolver", "Rope", "Lead piping", "Spanner"], ["Hall", "Study",
+                                                                                   "Billiard Room", "Lounge", "Library",
+                                                                                   "Kitchen"]]
+suspects = {1: "Colonel Mustard", 2: "Professor Plum", 3: "Reverend Green", 4: "Mrs. Peacock", 5: "Miss Scarlett",
+            6: "Mrs. White"}
+weapon = {1: "Dagger", 2: "Candlestick", 3: "Revolver", 4: "Rope", 5: "Lead piping", 6: "Spanner"}
+rooms = {1: "Hall", 2: "Lounge", 3: "Library", 4: "Kitchen", 5: "Billiard Room", 6: "Study"}
 
-IP = "127.0.0.1"
-PORT = 1234
+print("________________Setting up the Game Server__________________")
+# server_type = input("Choose the type of server...\n1.)Offline Server\n2.)Online Server\n")
+# if server_type == "1":
+server_type = "127.0.0.1"  # .................................................................Local host IP address.
+# elif server_type == "2":
+#     try:
+#         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         server.connect(("8.8.8.8", 80))  # ..................................Using Google DNS -To get your IPV4 Address.
+#         server_type = server.getsockname()[0]
+#         print(f"Players can connect using: {server_type} address.")
+#         server.close()
+#     except Exception as online_error:
+#         print(f"{online_error}: Check your internet connection.")
+#         sys.exit(1)
+# else:
+#     print("Invalid option !")
+#     sys.exit(1)
 
-# Create a socket
-# socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
-# socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
+n_players = 3
+if type(n_players) == int and 6 >= n_players >= 2:
+    print("Waiting for players to join....")
+else:
+    print("Invalid character entered.")
+    sys.exit(1)
 
-# SO_ - socket option
-# SOL_ - socket option level
-# Sets REUSEADDR (as a socket option) to 1 on socket
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-# Bind, so server informs operating system that it's going to use given IP and port
-# For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
-server_socket.bind((IP, PORT))
-
-# This makes server listen to new connections
-server_socket.listen()
-
-# List of sockets for select.select()
-sockets_list = [server_socket]
-
-# List of connected clients - socket as a key, user header and name as data
-clients = {}
-
-print(f'Listening for connections on {IP}:{PORT}...')
-
-# Handles message receiving
-def receive_message(client_socket):
-
-    try:
-
-        # Receive our "header" containing message length, it's size is defined and constant
-        message_header = client_socket.recv(HEADER_LENGTH)
-
-        # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-        if not len(message_header):
-            return False
-
-        # Convert header to int value
-        message_length = int(message_header.decode('utf-8').strip())
-
-        # Return an object of message header and message data
-        return {'header': message_header, 'data': client_socket.recv(message_length)}
-
-    except:
-
-        # If we are here, client closed connection violently, for example by pressing ctrl+c on his script
-        # or just lost his connection
-        # socket.close() also invokes socket.shutdown(socket.SHUT_RDWR) what sends information about closing the socket (shutdown read/write)
-        # and that's also a cause when we receive an empty message
-        return False
-
-while True:
-
-    # Calls Unix select() system call or Windows select() WinSock call with three parameters:
-    #   - rlist - sockets to be monitored for incoming data
-    #   - wlist - sockets for data to be send to (checks if for example buffers are not full and socket is ready to send some data)
-    #   - xlist - sockets to be monitored for exceptions (we want to monitor all sockets for errors, so we can use rlist)
-    # Returns lists:
-    #   - reading - sockets we received some data on (that way we don't have to check sockets manually)
-    #   - writing - sockets ready for data to be send thru them
-    #   - errors  - sockets with some exceptions
-    # This is a blocking call, code execution will "wait" here and "get" notified in case any action should be taken
-    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((server_type, 55555))
+server.listen(n_players)
 
 
-    # Iterate over notified sockets
-    for notified_socket in read_sockets:
+def send_all(message, ex_id=""):
+    """ Sends message to all players in the game. """
+    for player in players:
+        if player == ex_id:
+            continue
+        player.send(message.encode("utf-8"))
 
-        # If notified socket is a server socket - new connection, accept it
-        if notified_socket == server_socket:
 
-            # Accept new connection
-            # That gives us new socket - client socket, connected to this given client only, it's unique for that client
-            # The other returned object is ip/port set
-            client_socket, client_address = server_socket.accept()
+def dice_s():
+    """ Dice simulator. """
+    return random.randint(1, 6)
 
-            # Client should send his name right away, receive it
-            user = receive_message(client_socket)
 
-            # If False - client disconnected before he sent his name
-            if user is False:
-                continue
+def shuffle_cards(t_cards, num_players, players_nicknames):
+    """ Shuffle cards and distribute among players.
+    Returns two dictionaries: 1.) nickname-their cards 2.) Murder Envelope cards. """
+    x = 0
+    y = int(15 / num_players)
+    count = y
+    excess_cards = 15 % num_players
+    temp_decs = []
+    p_cards = []
+    params = ["Killer", "Weapon", "Place"]  # .................................... Keys to access Murder Envelope cards.
+    for i in range(0, 3):
+        random.shuffle(t_cards[i])
+        secret_deck.update({params[i]: t_cards[i][i]})
+    for i in range(0, 3):
+        t_cards[i].remove(secret_deck[params[i]])
+        p_cards.extend(t_cards[i])
+    random.shuffle(p_cards)
+    for i in range(0, num_players):
+        dec = p_cards[x:count]
+        temp_decs.append(dec)
+        x = count
+        count += y
+    count = 15 - excess_cards
+    if excess_cards != 0:
+        for i in range(1, excess_cards + 1):
+            temp_decs[i].append(p_cards[count + i - 1])
+    decks = {}
+    for i in range(0, num_players):
+        decks.update({players_nicknames[i]: temp_decs[i]})
+    print(decks, "\n", secret_deck)
+    return decks, secret_deck
 
-            # Add accepted socket to select.select() list
-            sockets_list.append(client_socket)
 
-            # Also save username and username header
-            clients[client_socket] = user
+def player_nickname(player):
+    """ Ask newly joined players to choose and nickname and checks if there is no same name collision."""
 
-            client_message = 'New Player -> {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8'))
-            print(client_message)
-            with open('readme.txt', 'w') as f:
-                f.write(client_message)
+    player.send("Please choose a nickname: ".encode("utf-8"))
+    nickname = player.recv(1024).decode("utf-8")
+    # while True:
+    #     if re.fullmatch(valid_name_pattern, nickname):
+    #         break
+    #     else:
+    #         player.send('Invalid character used !'.encode("utf-8"))
+    #         player.send("Choose a valid nickname: ".encode("utf-8"))
+    #         nickname = player.recv(1024).decode("utf-8")
+    while nickname in nicknames:
+        player.send("This name is not available!\nPlease choose another nickname: ".encode("utf-8"))
+        nickname = player.recv(1024).decode("utf-8")
+    nicknames.append(nickname)
+    members.update({nickname: player})
+    player_point.update({nickname: 0})
+    return nickname
 
-        # Else existing socket is sending a message
+
+def accept_requests():
+    """Accepts new connection until selected number of people join."""
+    global players_deck, secret_deck
+    while len(players) < n_players:
+        send_all("Waiting for other players to join...")
+        player, address = server.accept()
+        players.append(player)
+        player.send("Hey there!\n".encode("utf-8"))
+        nickname = player_nickname(player)
+        send_all(f"{nickname} has joined the Game.\n")
+    players_deck, secret_deck = shuffle_cards(cards, n_players, nicknames)
+    time.sleep(2)
+    send_all("\nShuffling Cards...")
+    time.sleep(2)
+    send_all("...")
+    time.sleep(2)
+    send_all("...")
+    time.sleep(2)
+    send_all(game_art1)
+    time.sleep(2)
+    send_all(game_art2)
+    time.sleep(2)
+    send_all(game_art3)
+    time.sleep(2)
+    nicknames.sort()
+    main_game()
+    return None
+
+
+def player_turn(nickname):
+    """Ask the given player to roll dice and enter in room to make suggestion if applicable.
+    returns True only when player wins."""
+    player_id = members[nickname]
+    temp_win = True
+    player_id.send("---------------------------------------------------\n".encode("utf-8"))
+    player_id.send("Hit 'y' to Roll Dice..".encode("utf-8"))
+    player_id.recv(1024).decode("utf-8")
+    dice_count = dice_s()
+    player_id.send("\n=============================================".encode("utf-8"))
+    player_id.send(f"You have rolled: {dice_count}.".encode("utf-8"))
+    send_all(f"{nickname} rolled: {dice_count}", ex_id=player_id)
+    player_point[nickname] += dice_count
+    if player_point[nickname] >= 8:
+        player_id.send("\nWant to enter in a room ? (y/n)".encode("utf-8"))
+        choice = player_id.recv(1024).decode("utf-8")
+        if choice == 'y':
+            player_point[nickname] = 0
+            player_id.send(room_table.encode("utf-8"))
+            player_id.send("\nChoose a room to enter: ".encode("utf-8"))
+            room_no = 0
+            while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
+                try:
+                    room_no = int(player_id.recv(1024).decode("utf-8"))
+                except Exception as e:
+                    player_id.send("Invalid room selected!\n".encode("utf-8"))
+                    print(f"Invalid Character Entered by user: {e}")
+                    room_no = 0
+            player_id.send("\nChoose Suspect and Weapon. (separated by space)".encode("utf-8"))
+            time.sleep(0.5)
+            player_id.send(option_table.encode("utf-8"))
+            sus_wea = [0, 0]
+            while sus_wea[0] > 6 or sus_wea[0] < 1 or type(sus_wea[0]) != int or len(sus_wea) != 2:
+                # ..................................................................To check if entered option is valid.
+                try:
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(" ")))
+                except Exception as er:
+                    print(f"Invalid Character Entered: {er}")
+                    player_id.send("Invalid Character selected!".encode("utf-8"))
+                    sus_wea = [0, 0]
+            while sus_wea[1] > 6 or sus_wea[1] < 1 or type(sus_wea[1]) != int or len(sus_wea) != 2:
+                # ..................................................................To check if entered option is valid.
+                try:
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(" ")))
+                except Exception as er:
+                    print(f"Invalid Weapon Entered: {er}")
+                    player_id.send("Invalid Character selected!".encode("utf-8"))
+                    sus_wea = [0, 0]
+            send_all(f"\n{nickname}'s suggestion:")
+            send_all(suggestion.format((suspects[sus_wea[0]]), weapon[sus_wea[1]], rooms[room_no]))
+            accused = [suspects[sus_wea[0]], weapon[sus_wea[1]], rooms[room_no]]
+            time.sleep(2)
+            for name in nicknames:
+                for accuse in accused:
+                    if accuse in players_deck[name] and name != nickname:
+                        send_all(f"{name} has disapproved {nickname}'s suggestion.", player_id)
+                        player_id.send(f"{name} has {accuse}.".encode("utf-8"))
+                        temp_win = False
+                        break
+                if not temp_win:
+                    break
+            if temp_win:
+                send_all(f"No proof against {nickname}'s suggestion.")
+            player_id.send("Do you want to revel cards ?(y/n)".encode("utf-8"))
+            choice_r = player_id.recv(1024).decode("utf-8")
+            if choice_r == 'y':
+                if secret_deck["Killer"] == suspects[sus_wea[0]] and secret_deck["Weapon"] == weapon[sus_wea[1]] and \
+                        secret_deck["Place"] == rooms[room_no]:
+                    send_all(f"{nickname} WON !")
+                    player_id.send(f"\nCongrats {nickname} you have solved the case !".encode("utf-8"))
+                    return True
+                else:
+                    send_all(f"Wrong accusation !\n{nickname} will no longer make accusations.")
+                    nicknames.remove(nickname)
+            else:
+                pass
         else:
+            pass
+    return False
 
-            # Receive message
-            message = receive_message(notified_socket)
 
-            # If False, client disconnected, cleanup
-            if message is False:
-                print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
+def show_player_detail():
+    """Display each player their cards and points."""
+    for name in nicknames:
+        player_id = members[name]
+        point = player_point[name]
+        deck = players_deck[name]
+        player_id.send("\n=============================================\n".encode("utf-8"))
+        player_id.send(f"Your Cards: {deck}\nYour points: {point}\n\n".encode("utf-8"))
 
-                # Remove from list for socket.socket()
-                sockets_list.remove(notified_socket)
 
-                # Remove from our list of users
-                del clients[notified_socket]
+def main_game():
+    """Passes player name to 'player_turn' function turn-by-turn until one player wins."""
+    iter_nickname = itertools.cycle(nicknames)
+    nickname = next(iter_nickname)
+    win = False
+    while not win:
+        time.sleep(1)
+        show_player_detail()
+        time.sleep(1)
+        win = player_turn(nickname)
+        nickname = next(iter_nickname)
+    send_all("\nThanks for playing.")
+    try:
+        members.get(nickname).recv(1024).decode("utf-8")
+    except Exception as e:
+        print(e)
+    server.close()
 
-                continue
-
-            # Get user by notified socket, so we will know who sent the message
-            user = clients[notified_socket]
-
-            # print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
-            client_message = f'{user["data"].decode("utf-8")} : {message["data"].decode("utf-8")}'
-            
-            print(client_message)
-            with open('readme.txt', 'w') as f:
-                f.write(client_message)
-
-            # Iterate over connected clients and broadcast message
-            for client_socket in clients:
-
-                # But don't sent it to sender
-                if client_socket != notified_socket:
-
-                    # Send user and message (both with their headers)
-                    # We are reusing here message header sent by sender, and saved username header send by user when he connected
-                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
-
-    # It's not really necessary to have this, but will handle some socket exceptions just in case
-    for notified_socket in exception_sockets:
-
-        # Remove from list for socket.socket()
-        sockets_list.remove(notified_socket)
-
-        # Remove from our list of users
-        del clients[notified_socket]
+accept_requests()

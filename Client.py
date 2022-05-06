@@ -1,82 +1,234 @@
+# # #!/usr/bin/env python3
 import socket
-import select
-import errno
+import threading
+from tkinter import *
+from tkinter import font
+from tkinter import ttk
+from PIL import ImageTk, Image
 
-HEADER_LENGTH = 10
+# import all functions /
+# everything from chat.py file
+# from chat import *
 
-IP = "127.0.0.1"
-PORT = 1234
-my_username = input("Username: ")
+PORT = 55555
+host = "127.0.0.1"
+FORMAT = "utf-8"
 
-# Create a socket
-# socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
-# socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Create a new client socket
+# and connect to the server
+client = socket.socket(socket.AF_INET,
+                    socket.SOCK_STREAM)
+client.connect((host, 55555))
 
-# Connect to a given ip and port
-client_socket.connect((IP, PORT))
 
-# Set connection to non-blocking state, so .recv() call won;t block, just return some exception we'll handle
-client_socket.setblocking(False)
+# GUI class for the chat
+class GUI:
+    # constructor method
+    def __init__(self):
+    
+        # chat window which is currently hidden
+        self.Window = Tk()
+        self.Window.withdraw()
+        
+        # login window
+        self.login = Toplevel()
+        # set the title
+        self.login.title("Login")
+        self.login.resizable(width = False,
+                            height = False)
+        self.login.configure(width = 400,
+                            height = 300)
+        # create a Label
+        self.pls = Label(self.login,
+                    text = "Please login to continue",
+                    justify = CENTER,
+                    font = "Helvetica 14 bold")
+        
+        self.pls.place(relheight = 0.15,
+                    relx = 0.2,
+                    rely = 0.07)
+        
+        # create a Label
+        self.labelName = Label(self.login,
+                            text = "Name: ",
+                            font = "Helvetica 12")
+        
+        self.labelName.place(relheight = 0.2,
+                            relx = 0.1,
+                            rely = 0.2)
+        
+        # create a entry box for
+        # tyoing the message
+        self.entryName = Entry(self.login,
+                            font = "Helvetica 14")
+        
+        self.entryName.place(relwidth = 0.4,
+                            relheight = 0.12,
+                            relx = 0.35,
+                            rely = 0.2)
+        
+        # set the focus of the cursor
+        self.entryName.focus()
+        
+        # create a Continue Button
+        # along with action
+        self.go = Button(self.login,
+                        text = "CONTINUE",
+                        font = "Helvetica 14 bold",
+                        command = lambda: self.goAhead(self.entryName.get()))
+        
+        self.go.place(relx = 0.4,
+                    rely = 0.55)
+        self.Window.mainloop()
 
-# Prepare username and header and send them
-# We need to encode username to bytes, then count number of bytes and prepare header of fixed size, that we encode to bytes as well
-username = my_username.encode('utf-8')
-username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
-client_socket.send(username_header + username)
+    def goAhead(self, name):
+        self.login.destroy()
+        self.layout(name)
+        
+        # the thread to receive messages
+        rcv = threading.Thread(target=self.receive)
+        rcv.start()
 
-while True:
+    # The main layout of the chat
+    def layout(self,name):
+    
+        self.name = name
+        # to show chat window
+        self.Window.deiconify()
+        self.Window.title("CHATROOM")
+        self.Window.resizable(width = False,
+                            height = False)
+        self.Window.configure(width = 1000,
+                            height = 800,
+                            bg = "#17202A")
+        self.labelHead = Label(self.Window,
+                            bg = "#17202A",
+                            fg = "#EAECEE",
+                            text = self.name ,
+                            font = "Helvetica 13 bold",
+                            pady = 5)
+        
+        self.labelHead.place(relwidth = 1)
+        self.line = Label(self.Window,
+                        width = 450,
+                        bg = "#ABB2B9")
 
-    # Wait for user to input a message
-    message = input(f'{my_username} > ')
+        self.line.place(relwidth = 1,
+                        rely = 0.07,
+                        relheight = 0.012)
 
-    # If message is not empty - send it
-    if message:
+        
+        self.textCons = Text(self.Window,
+                            width = 20,
+                            height = 2,
+                            bg = "#17202A",
+                            fg = "#EAECEE",
+                            font = "Helvetica 14",
+                            padx = 5,
+                            pady = 5)
+        
+        self.textCons.place(relheight = 0.745,
+                            relwidth = .35,
+                            rely = 0.08)
+        
+        self.labelBottom = Label(self.Window,
+                                bg = "#ABB2B9",
+                                height = 80)
+        
+        self.labelBottom.place(relwidth = 1,
+                            rely = 0.825)
+        
+        self.entryMsg = Entry(self.labelBottom,
+                            bg = "#2C3E50",
+                            fg = "#EAECEE",
+                            font = "Helvetica 13")
+        
+        # place the given widget
+        # into the gui window
+        self.entryMsg.place(relwidth = 0.74,
+                            relheight = 0.06,
+                            rely = 0.008,
+                            relx = 0.011)
+        
+        self.entryMsg.focus()
+        
+        # create a Send Button
+        self.buttonMsg = Button(self.labelBottom,
+                                text = "Send",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.sendButton(self.entryMsg.get()))
+        
+        self.buttonMsg.place(relx = 0.77,
+                            rely = 0.008,
+                            relheight = 0.06,
+                            relwidth = 0.22)
+        
+        self.textCons.config(cursor = "arrow")
+        
+        # create a scroll bar
+        scrollbar = Scrollbar(self.textCons)
+        
+        # place the scroll bar
+        # into the gui window
+        scrollbar.place(relheight = 1,
+                        relx = 0.974)
+        
+        scrollbar.config(command = self.textCons.yview)
+        
+        self.textCons.config(state = DISABLED)
 
-        # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
-        message = message.encode('utf-8')
-        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-        client_socket.send(message_header + message)
+        filename = "board.png"
+        pillow_image = Image.open(filename)
+        pillow_image.thumbnail((550,550),Image.ANTIALIAS)
+        bg = ImageTk.PhotoImage(pillow_image)
+        self.Window.bg = bg  # to prevent the image garbage collected.
 
-    try:
-        # Now we want to loop over received messages (there might be more than one) and print them
+        self.labelBoard = Canvas(self.Window)
+        self.labelBoard.place(x=400, y=75, width=550, height=550)
+        self.labelBoard.create_image(0, 0, image = bg, 
+                        anchor = "nw")
+
+
+    # function to basically start the thread for sending messages
+    def sendButton(self, msg):
+        self.textCons.config(state = DISABLED)
+        self.msg=msg
+        self.entryMsg.delete(0, END)
+        snd= threading.Thread(target = self.sendMessage)
+        snd.start()
+
+    # function to receive messages
+    def receive(self):
         while True:
+            try:
+                message = client.recv(1024).decode(FORMAT)
+                
+                # if the messages from the server is NAME send the client's name
+                if message == 'NAME':
+                    client.send(self.name.encode(FORMAT))
+                else:
+                    # insert messages to text box
+                    self.textCons.config(state = NORMAL)
+                    self.textCons.insert(END,
+                                        message+"\n\n")
+                    
+                    self.textCons.config(state = DISABLED)
+                    self.textCons.see(END)
+            except:
+                # an error will be printed on the command line or console if there's an error
+                print("An error occured!")
+                client.close()
+                break
+        
+    # function to send messages
+    def sendMessage(self):
+        self.textCons.config(state=DISABLED)
+        while True:
+            message = (f"{self.name}: {self.msg}")
+            client.send(message.encode(FORMAT))
+            break
 
-            # Receive our "header" containing username length, it's size is defined and constant
-            username_header = client_socket.recv(HEADER_LENGTH)
-
-            # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-            if not len(username_header):
-                print('Connection closed by the server')
-                sys.exit()
-
-            # Convert header to int value
-            username_length = int(username_header.decode('utf-8').strip())
-
-            # Receive and decode username
-            username = client_socket.recv(username_length).decode('utf-8')
-
-            # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
-            message_header = client_socket.recv(HEADER_LENGTH)
-            message_length = int(message_header.decode('utf-8').strip())
-            message = client_socket.recv(message_length).decode('utf-8')
-
-            # Print message
-            print(f'{username} > {message}')
-
-    except IOError as e:
-        # This is normal on non blocking connections - when there are no incoming data error is going to be raised
-        # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
-        # We are going to check for both - if one of them - that's expected, means no incoming data, continue as normal
-        # If we got different error code - something happened
-        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-            print('Reading error: {}'.format(str(e)))
-            sys.exit()
-
-        # We just did not receive anything
-        continue
-
-    except Exception as e:
-        # Any other exception - something happened, exit
-        print('Reading error: '.format(str(e)))
-        sys.exit()
+# create a GUI class object
+g = GUI()
