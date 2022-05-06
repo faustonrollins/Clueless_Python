@@ -3,6 +3,7 @@
 Detectives today started sifting the evidences at the Tudor Hall, home of the late Dr.Black who was found
 murdered last Thursday evening. A number of suspects - guests of Dr.Black - are being questioned. A collection of items
 said to be the possible murder weapons have been found too.
+
 The idea of Cluedo is to move from room to room to eliminate people, places, and weapons.
 The player who correctly accuses Who, What, and Where wins.
 Note: You can only enter in a room when your points are 8 or more than 8.
@@ -84,24 +85,25 @@ weapon = {1: "Dagger", 2: "Candlestick", 3: "Revolver", 4: "Rope", 5: "Lead pipi
 rooms = {1: "Hall", 2: "Lounge", 3: "Library", 4: "Kitchen", 5: "Billiard Room", 6: "Study"}
 
 print("________________Setting up the Game Server__________________")
-server_type = input("Choose the type of server...\n1.)Offline Server\n2.)Online Server\n")
-if server_type == "1":
-    server_type = "127.0.0.1"  # .................................................................Local host IP address.
-elif server_type == "2":
-    try:
-        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server.connect(("8.8.8.8", 80))  # ..................................Using Google DNS -To get your IPV4 Address.
-        server_type = server.getsockname()[0]
-        print(f"Players can connect using: {server_type} address.")
-        server.close()
-    except Exception as online_error:
-        print(f"{online_error}: Check your internet connection.")
-        sys.exit(1)
-else:
-    print("Invalid option !")
-    sys.exit(1)
+# server_type = input("Choose the type of server...\n1.)Offline Server\n2.)Online Server\n")
+# if server_type == "1":
+server_type = "127.0.0.1"  # .................................................................Local host IP address.
+# elif server_type == "2":
+#     try:
+#         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         server.connect(("8.8.8.8", 80))  # ..................................Using Google DNS -To get your IPV4 Address.
+#         server_type = server.getsockname()[0]
+#         print(f"Players can connect using: {server_type} address.")
+#         server.close()
+#     except Exception as online_error:
+#         print(f"{online_error}: Check your internet connection.")
+#         sys.exit(1)
+# else:
+#     print("Invalid option !")
+#     sys.exit(1)
 
-n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
+# n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
+n_players = 3
 if type(n_players) == int and 6 >= n_players >= 2:
     print("Waiting for players to join....")
 else:
@@ -164,13 +166,13 @@ def player_nickname(player):
 
     player.send("Please choose a nickname: ".encode("utf-8"))
     nickname = player.recv(1024).decode("utf-8")
-    while True:
-        if re.fullmatch(valid_name_pattern, nickname):
-            break
-        else:
-            player.send('Invalid character used !'.encode("utf-8"))
-            player.send("Choose a valid nickname: ".encode("utf-8"))
-            nickname = player.recv(1024).decode("utf-8")
+    # while True:
+    #     if re.fullmatch(valid_name_pattern, nickname):
+    #         break
+    #     else:
+    #         player.send('Invalid character used !'.encode("utf-8"))
+    #         player.send("Choose a valid nickname: ".encode("utf-8"))
+    #         nickname = player.recv(1024).decode("utf-8")
     while nickname in nicknames:
         player.send("This name is not available!\nPlease choose another nickname: ".encode("utf-8"))
         nickname = player.recv(1024).decode("utf-8")
@@ -317,6 +319,5 @@ def main_game():
     except Exception as e:
         print(e)
     server.close()
-
 
 accept_requests()
