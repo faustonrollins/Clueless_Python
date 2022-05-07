@@ -234,6 +234,8 @@ def player_turn(nickname):
             while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
                 try:
                     room_no = int(player_id.recv(1024).decode("utf-8")[-1])
+                    # send_all(f"UPP GREEN MUSTARD\n")
+
                 except Exception as e:
                     player_id.send("Invalid room selected!\n".encode("utf-8"))
                     print(f"Invalid Character Entered by user: {e}")

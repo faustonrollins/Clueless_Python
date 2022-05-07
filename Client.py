@@ -89,6 +89,23 @@ class GUI:
         rcv = threading.Thread(target=self.receive)
         rcv.start()
 
+
+    # def playerOnBoard(self, playerPiece, boardRoom):
+    #     if boardRoom == "Ballroom":
+    #         x = 50
+    #         y = 50
+    #     else:
+    #         x = 0
+    #         y = 10
+    #     filename = "./token/" + playerPiece + ".png"
+    #     pillow_image = Image.open(filename)
+    #     pillow_image.thumbnail((50,50),Image.ANTIALIAS)
+    #     bg = ImageTk.PhotoImage(pillow_image)
+    #     self.labelPlayer1 = Canvas(self.Window)
+    #     self.labelPlayer1.place(x=40, y=75, width=50, height=50)
+    #     self.labelPlayer1.create_image(0, 0, image = bg, 
+    #                     anchor = "nw")
+
     # The main layout of the chat
     def layout(self,name):
     
@@ -154,7 +171,7 @@ class GUI:
         
         # create a Send Button
         self.buttonMsg = Button(self.labelBottom,
-                                text = "Send",
+                                text = "ENTER",
                                 font = "Helvetica 10 bold",
                                 width = 20,
                                 bg = "#ABB2B9",
@@ -190,6 +207,16 @@ class GUI:
         self.labelBoard.create_image(0, 0, image = bg, 
                         anchor = "nw")
 
+        # filename = "./tokens/green.png"
+        # pillow_image = Image.open(filename)
+        # pillow_image.thumbnail((50,50),Image.ANTIALIAS)
+        # bg = ImageTk.PhotoImage(pillow_image)
+        # self.Window.bg = bg  # to prevent the image garbage collected.
+
+        # self.labelPlayer1 = Canvas(self.Window)
+        # self.labelPlayer1.place(x=40, y=75, width=50, height=50)
+        # self.labelPlayer1.create_image(0, 0, image = bg, 
+        #                 anchor = "nw")
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
@@ -198,6 +225,7 @@ class GUI:
         self.entryMsg.delete(0, END)
         snd= threading.Thread(target = self.sendMessage)
         snd.start()
+
 
     # function to receive messages
     def receive(self):
@@ -216,6 +244,13 @@ class GUI:
                     
                     self.textCons.config(state = DISABLED)
                     self.textCons.see(END)
+                # if message[:3] == "UPP":
+                #     playerPiece = message.split(":")[1]
+                #     print(playerPiece)
+                #     boardRoom = message.split(":")[1]
+                #     print(boardRoom)
+                #     GUI.playerOnBoard(self, "green", "Ballroom")
+
             except:
                 # an error will be printed on the command line or console if there's an error
                 print("An error occured!")
