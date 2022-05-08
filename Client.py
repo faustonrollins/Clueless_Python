@@ -140,7 +140,7 @@ class GUI:
                             height = 2,
                             bg = "#17202A",
                             fg = "#EAECEE",
-                            font = "Helvetica 14",
+                            font = "Helvetica 10",
                             padx = 5,
                             pady = 5)
         
