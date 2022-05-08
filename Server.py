@@ -7,8 +7,7 @@ said to be the possible murder weapons have been found too.
 The idea of Cluedo is to move from room to room to eliminate people, places, and weapons.
 The player who correctly accuses Who, What, and Where wins.
 Note: You can only enter in a room when your points are 8 or more than 8.
-Author: Kartikay Chiranjeev Gupta
-Last Date of modification: 20/6/2021
+
 """
 
 import socket
@@ -103,7 +102,7 @@ server_type = "127.0.0.1"  # ...................................................
 #     sys.exit(1)
 
 # n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
-n_players = 3
+n_players = 2
 if type(n_players) == int and 6 >= n_players >= 2:
     print("Waiting for players to join....")
 else:
@@ -227,14 +226,16 @@ def player_turn(nickname):
     if player_point[nickname] >= 8:
         player_id.send("\nWant to enter in a room ? (y/n)".encode("utf-8"))
         choice = player_id.recv(1024).decode("utf-8")
-        if choice == 'y':
+        if choice[-1] == 'y':
             player_point[nickname] = 0
             player_id.send(room_table.encode("utf-8"))
             player_id.send("\nChoose a room to enter: ".encode("utf-8"))
             room_no = 0
             while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
                 try:
-                    room_no = int(player_id.recv(1024).decode("utf-8"))
+                    room_no = int(player_id.recv(1024).decode("utf-8")[-1])
+                    # send_all(f"UPP GREEN MUSTARD\n")
+
                 except Exception as e:
                     player_id.send("Invalid room selected!\n".encode("utf-8"))
                     print(f"Invalid Character Entered by user: {e}")
@@ -246,7 +247,7 @@ def player_turn(nickname):
             while sus_wea[0] > 6 or sus_wea[0] < 1 or type(sus_wea[0]) != int or len(sus_wea) != 2:
                 # ..................................................................To check if entered option is valid.
                 try:
-                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(" ")))
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(": ")[1].split(" ")))
                 except Exception as er:
                     print(f"Invalid Character Entered: {er}")
                     player_id.send("Invalid Character selected!".encode("utf-8"))
@@ -254,7 +255,8 @@ def player_turn(nickname):
             while sus_wea[1] > 6 or sus_wea[1] < 1 or type(sus_wea[1]) != int or len(sus_wea) != 2:
                 # ..................................................................To check if entered option is valid.
                 try:
-                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(" ")))
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(": ")[1].split(" ")))
+
                 except Exception as er:
                     print(f"Invalid Weapon Entered: {er}")
                     player_id.send("Invalid Character selected!".encode("utf-8"))
@@ -275,7 +277,7 @@ def player_turn(nickname):
             if temp_win:
                 send_all(f"No proof against {nickname}'s suggestion.")
             player_id.send("Do you want to revel cards ?(y/n)".encode("utf-8"))
-            choice_r = player_id.recv(1024).decode("utf-8")
+            choice_r = player_id.recv(1024).decode("utf-8")[-1]
             if choice_r == 'y':
                 if secret_deck["Killer"] == suspects[sus_wea[0]] and secret_deck["Weapon"] == weapon[sus_wea[1]] and \
                         secret_deck["Place"] == rooms[room_no]:
