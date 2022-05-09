@@ -236,16 +236,14 @@ class GUI:
                             relwidth = 0.22)
         
         self.textCons.config(cursor = "arrow")
-        ####
-        ####
-
+        
+        ####This is the second input field w/Button (for chat)
         self.entryMsg2 = Entry(self.labelBottom,
                             bg = "#2C3E50",
                             fg = "#EAECEE",
                             font = "Helvetica 13")
         
-        # place the given widget
-        # into the gui window
+
         self.entryMsg2.place(relwidth = 0.74,
                             relheight = 0.03,
                             rely = 0.01,
@@ -265,9 +263,6 @@ class GUI:
                             rely = 0.01,
                             relheight = 0.03,
                             relwidth = 0.22)
-
-        ####
-        ####
         
         # create a scroll bar
         scrollbar = Scrollbar(self.textCons)
@@ -301,6 +296,7 @@ class GUI:
         snd= threading.Thread(target = self.sendMessage)
         snd.start()
 
+    # function to basically start the thread for sending messages for chat
     def chatButton(self, msg):
         self.textCons.config(state = DISABLED)
         self.msg=msg
