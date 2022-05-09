@@ -135,6 +135,7 @@ class GUI:
                         relheight = 0.012)
 
         
+
         self.textCons = Text(self.Window,
                             width = 20,
                             height = 2,
@@ -183,6 +184,90 @@ class GUI:
                             relwidth = 0.22)
         
         self.textCons.config(cursor = "arrow")
+
+
+        ###
+        ###
+        self.textCons = Text(self.Window,
+                            width = 20,
+                            height = 2,
+                            bg = "#17202A",
+                            fg = "#EAECEE",
+                            font = "Helvetica 10",
+                            padx = 5,
+                            pady = 5)
+        
+        self.textCons.place(relheight = 0.745,
+                            relwidth = .35,
+                            rely = 0.08)
+        
+        self.labelBottom = Label(self.Window,
+                                bg = "#ABB2B9",
+                                height = 80)
+        
+        self.labelBottom.place(relwidth = 1,
+                            rely = 0.825)
+        
+        self.entryMsg = Entry(self.labelBottom,
+                            bg = "#2C3E50",
+                            fg = "#EAECEE",
+                            font = "Helvetica 13")
+        
+        # place the given widget
+        # into the gui window
+        self.entryMsg.place(relwidth = 0.74,
+                            relheight = 0.03,
+                            rely = 0.06,
+                            relx = 0.011)
+        
+        self.entryMsg.focus()
+        
+        # create a Send Button
+        self.buttonMsg = Button(self.labelBottom,
+                                text = "ENTER",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.sendButton(self.entryMsg.get()))
+        
+        self.buttonMsg.place(relx = 0.77,
+                            rely = 0.06,
+                            relheight = 0.03,
+                            relwidth = 0.22)
+        
+        self.textCons.config(cursor = "arrow")
+        ####
+        ####
+
+        self.entryMsg2 = Entry(self.labelBottom,
+                            bg = "#2C3E50",
+                            fg = "#EAECEE",
+                            font = "Helvetica 13")
+        
+        # place the given widget
+        # into the gui window
+        self.entryMsg2.place(relwidth = 0.74,
+                            relheight = 0.03,
+                            rely = 0.01,
+                            relx = 0.01)
+        
+        self.entryMsg.focus()
+        
+        # create a Send Button
+        self.buttonMsg2 = Button(self.labelBottom,
+                                text = "SEND",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.chatButton(self.entryMsg.get()))
+        
+        self.buttonMsg2.place(relx = 0.77,
+                            rely = 0.01,
+                            relheight = 0.03,
+                            relwidth = 0.22)
+
+        ####
+        ####
         
         # create a scroll bar
         scrollbar = Scrollbar(self.textCons)
@@ -207,16 +292,6 @@ class GUI:
         self.labelBoard.create_image(0, 0, image = bg, 
                         anchor = "nw")
 
-        # filename = "./tokens/green.png"
-        # pillow_image = Image.open(filename)
-        # pillow_image.thumbnail((50,50),Image.ANTIALIAS)
-        # bg = ImageTk.PhotoImage(pillow_image)
-        # self.Window.bg = bg  # to prevent the image garbage collected.
-
-        # self.labelPlayer1 = Canvas(self.Window)
-        # self.labelPlayer1.place(x=40, y=75, width=50, height=50)
-        # self.labelPlayer1.create_image(0, 0, image = bg, 
-        #                 anchor = "nw")
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
@@ -226,6 +301,12 @@ class GUI:
         snd= threading.Thread(target = self.sendMessage)
         snd.start()
 
+    def chatButton(self, msg):
+        self.textCons.config(state = DISABLED)
+        self.msg=msg
+        self.entryMsg.delete(0, END)
+        snd= threading.Thread(target = self.sendMessage)
+        snd.start()
 
     # function to receive messages
     def receive(self):
