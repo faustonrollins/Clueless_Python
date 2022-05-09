@@ -110,7 +110,7 @@ else:
     sys.exit(1)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((server_type, 55555))
+server.bind((server_type, 55556))
 server.listen(n_players)
 
 
@@ -223,7 +223,7 @@ def player_turn(nickname):
     player_id.send(f"You have rolled: {dice_count}.".encode("utf-8"))
     send_all(f"{nickname} rolled: {dice_count}", ex_id=player_id)
     player_point[nickname] += dice_count
-    if player_point[nickname] >= 8:
+    if player_point[nickname] > 7 and player_point[nickname] < 9:
         player_id.send("\nWant to enter in a room ? (y/n)".encode("utf-8"))
         choice = player_id.recv(1024).decode("utf-8")
         if choice[-1] == 'y':
@@ -291,6 +291,81 @@ def player_turn(nickname):
                 pass
         else:
             pass
+
+    elif player_point[nickname] > 8:
+        room_no = random.randint(1,6)
+        diagonal_room = rooms[room_no]
+        player_id.send(("\nEnter room: %s?" % diagonal_room).encode("utf-8"))
+        room_choice = player_id.recv(1024).decode("utf-8")
+        if room_choice[-1] == 'y':
+            player_point[nickname] = 0
+            # diagonal_room = rooms[random.randint(1,6)]
+            # player_id.send(room_table.encode("utf-8"))
+            # player_id.send("\nEnter room: "+ diagonal_room + "?".encode("utf-8"))
+            # room_choice = player_id.recv(1024).decode("utf-8")
+            # if room_choice[-1] == 'y':
+            # room_no = 0
+            # while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
+            #     try:
+            #         room_no = int(player_id.recv(1024).decode("utf-8")[-1])
+            #         # send_all(f"UPP GREEN MUSTARD\n")
+
+            #     except Exception as e:
+            #         player_id.send("Invalid room selected!\n".encode("utf-8"))
+            #         print(f"Invalid Character Entered by user: {e}")
+            #         room_no = 0
+            player_id.send("\nChoose Suspect and Weapon. (separated by space)".encode("utf-8"))
+            time.sleep(0.5)
+            player_id.send(option_table.encode("utf-8"))
+            sus_wea = [0, 0]
+            while sus_wea[0] > 6 or sus_wea[0] < 1 or type(sus_wea[0]) != int or len(sus_wea) != 2:
+                # ..................................................................To check if entered option is valid.
+                try:
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(": ")[1].split(" ")))
+                except Exception as er:
+                    print(f"Invalid Character Entered: {er}")
+                    player_id.send("Invalid Character selected!".encode("utf-8"))
+                    sus_wea = [0, 0]
+            while sus_wea[1] > 6 or sus_wea[1] < 1 or type(sus_wea[1]) != int or len(sus_wea) != 2:
+                # ..................................................................To check if entered option is valid.
+                try:
+                    sus_wea = list(map(int, player_id.recv(1024).decode("utf-8").split(": ")[1].split(" ")))
+
+                except Exception as er:
+                    print(f"Invalid Weapon Entered: {er}")
+                    player_id.send("Invalid Character selected!".encode("utf-8"))
+                    sus_wea = [0, 0]
+            send_all(f"\n{nickname}'s suggestion:")
+            send_all(suggestion.format((suspects[sus_wea[0]]), weapon[sus_wea[1]], rooms[room_no]))
+            accused = [suspects[sus_wea[0]], weapon[sus_wea[1]], rooms[room_no]]
+            time.sleep(2)
+            for name in nicknames:
+                for accuse in accused:
+                    if accuse in players_deck[name] and name != nickname:
+                        send_all(f"{name} has disapproved {nickname}'s suggestion.", player_id)
+                        player_id.send(f"{name} has {accuse}.".encode("utf-8"))
+                        temp_win = False
+                        break
+                if not temp_win:
+                    break
+            if temp_win:
+                send_all(f"No proof against {nickname}'s suggestion.")
+            player_id.send("Do you want to revel cards ?(y/n)".encode("utf-8"))
+            choice_r = player_id.recv(1024).decode("utf-8")[-1]
+            if choice_r == 'y':
+                if secret_deck["Killer"] == suspects[sus_wea[0]] and secret_deck["Weapon"] == weapon[sus_wea[1]] and \
+                        secret_deck["Place"] == rooms[room_no]:
+                    send_all(f"{nickname} WON !")
+                    player_id.send(f"\nCongrats {nickname} you have solved the case !".encode("utf-8"))
+                    return True
+                else:
+                    send_all(f"Wrong accusation !\n{nickname} will no longer make accusations.")
+                    nicknames.remove(nickname)
+            else:
+                pass
+        else:
+            pass
+
     return False
 
 
@@ -302,6 +377,14 @@ def show_player_detail():
         deck = players_deck[name]
         player_id.send("\n=============================================\n".encode("utf-8"))
         player_id.send(f"Your Cards: {deck}\nYour points: {point}\n\n".encode("utf-8"))
+                
+        # Add broadcase message to update player's position
+        print("---------Print player details for broadcast message---------")
+        print("Player name: ", name)
+        print("Position: ", point)
+        allPosition = "Player positions: ***[" + str(name) + " " + str(point) + "]***"
+        send_all(allPosition)
+        time.sleep(2)
 
 
 def main_game():

@@ -1,10 +1,15 @@
 # # #!/usr/bin/env python3
+from ast import pattern
+from cgi import test
 import socket
 import threading
 from tkinter import *
 from tkinter import font
 from tkinter import ttk
+import tkinter
+from turtle import pos
 from PIL import ImageTk, Image
+import re
 
 # import all functions /
 # everything from chat.py file
@@ -18,7 +23,7 @@ FORMAT = "utf-8"
 # and connect to the server
 client = socket.socket(socket.AF_INET,
                     socket.SOCK_STREAM)
-client.connect((host, 55555))
+client.connect((host, 55556))
 
 
 # GUI class for the chat
@@ -135,12 +140,13 @@ class GUI:
                         relheight = 0.012)
 
         
+
         self.textCons = Text(self.Window,
                             width = 20,
                             height = 2,
                             bg = "#17202A",
                             fg = "#EAECEE",
-                            font = "Helvetica 14",
+                            font = "Helvetica 10",
                             padx = 5,
                             pady = 5)
         
@@ -183,6 +189,85 @@ class GUI:
                             relwidth = 0.22)
         
         self.textCons.config(cursor = "arrow")
+
+
+        ###
+        ###
+        self.textCons = Text(self.Window,
+                            width = 20,
+                            height = 2,
+                            bg = "#17202A",
+                            fg = "#EAECEE",
+                            font = "Helvetica 10",
+                            padx = 5,
+                            pady = 5)
+        
+        self.textCons.place(relheight = 0.745,
+                            relwidth = .35,
+                            rely = 0.08)
+        
+        self.labelBottom = Label(self.Window,
+                                bg = "#ABB2B9",
+                                height = 80)
+        
+        self.labelBottom.place(relwidth = 1,
+                            rely = 0.825)
+        
+        self.entryMsg = Entry(self.labelBottom,
+                            bg = "#2C3E50",
+                            fg = "#EAECEE",
+                            font = "Helvetica 13")
+        
+        # place the given widget
+        # into the gui window
+        self.entryMsg.place(relwidth = 0.74,
+                            relheight = 0.03,
+                            rely = 0.06,
+                            relx = 0.011)
+        
+        self.entryMsg.focus()
+        
+        # create a Send Button
+        self.buttonMsg = Button(self.labelBottom,
+                                text = "ENTER",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.sendButton(self.entryMsg.get()))
+        
+        self.buttonMsg.place(relx = 0.77,
+                            rely = 0.06,
+                            relheight = 0.03,
+                            relwidth = 0.22)
+        
+        self.textCons.config(cursor = "arrow")
+        
+        ####This is the second input field w/Button (for chat)
+        self.entryMsg2 = Entry(self.labelBottom,
+                            bg = "#2C3E50",
+                            fg = "#EAECEE",
+                            font = "Helvetica 13")
+        
+
+        self.entryMsg2.place(relwidth = 0.74,
+                            relheight = 0.03,
+                            rely = 0.01,
+                            relx = 0.01)
+        
+        self.entryMsg.focus()
+        
+        # create a Send Button
+        self.buttonMsg2 = Button(self.labelBottom,
+                                text = "SEND",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.chatButton(self.entryMsg.get()))
+        
+        self.buttonMsg2.place(relx = 0.77,
+                            rely = 0.01,
+                            relheight = 0.03,
+                            relwidth = 0.22)
         
         # create a scroll bar
         scrollbar = Scrollbar(self.textCons)
@@ -207,16 +292,6 @@ class GUI:
         self.labelBoard.create_image(0, 0, image = bg, 
                         anchor = "nw")
 
-        # filename = "./tokens/green.png"
-        # pillow_image = Image.open(filename)
-        # pillow_image.thumbnail((50,50),Image.ANTIALIAS)
-        # bg = ImageTk.PhotoImage(pillow_image)
-        # self.Window.bg = bg  # to prevent the image garbage collected.
-
-        # self.labelPlayer1 = Canvas(self.Window)
-        # self.labelPlayer1.place(x=40, y=75, width=50, height=50)
-        # self.labelPlayer1.create_image(0, 0, image = bg, 
-        #                 anchor = "nw")
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
@@ -226,6 +301,15 @@ class GUI:
         snd= threading.Thread(target = self.sendMessage)
         snd.start()
 
+    # function to basically start the thread for sending messages for chat
+    def chatButton(self, msg):
+        self.textCons.config(state = DISABLED)
+        self.msg=msg
+        self.entryMsg.delete(0, END)
+        snd= threading.Thread(target = self.sendMessage)
+        snd.start()
+
+
 
     # function to receive messages
     def receive(self):
@@ -233,6 +317,40 @@ class GUI:
             try:
                 message = client.recv(1024).decode(FORMAT)
                 
+                # Start regex the message
+                    # function to update player position on the board
+                def updatePosition(name, position):
+                    match name:
+                        case 'Green':
+                            print('found Green at ', position)
+                        case 'White':
+                            print('found White at ', position)
+             
+                inMsg = str(message)
+                foundTxt = re.search("Player position", inMsg)
+                if foundTxt:
+                    print("Got update on player's position")
+                    posPattern = '\\*..\[\D*\d*]\*..'
+                    for m in re.finditer(posPattern, inMsg):
+                        # print('found at ', m.start(), m.end())
+                        positionMsg = inMsg[m.start():m.end()]
+                        # print(positionMsg)
+
+                    print("Do something with position")
+                    # Parse the name and position
+                    pName = re.search(r'\[\D*:', positionMsg)
+                    playerName = positionMsg[pName.start()+1 : pName.end()-1]
+                    print(playerName)
+                    pPosition = re.search(r'\d*]', positionMsg)
+                    playerPosition = positionMsg[pPosition.start() : pPosition.end()-1]
+                    print(playerPosition)
+                    print("done parsing")
+                    updatePosition(playerName, playerPosition)
+
+
+
+
+
                 # if the messages from the server is NAME send the client's name
                 if message == 'NAME':
                     client.send(self.name.encode(FORMAT))
@@ -241,6 +359,7 @@ class GUI:
                     self.textCons.config(state = NORMAL)
                     self.textCons.insert(END,
                                         message+"\n\n")
+
                     
                     self.textCons.config(state = DISABLED)
                     self.textCons.see(END)
