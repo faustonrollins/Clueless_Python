@@ -239,6 +239,9 @@ class GUI:
         self.labelBoard.create_image(0, 0, image = bg, 
                         anchor = "nw")
 
+
+
+
         filename2 = "./tokens/Colonel Mustard.png"
         pillow_image_2 = Image.open(filename2)
         pillow_image_2.thumbnail((70,70),Image.ANTIALIAS)
@@ -249,6 +252,9 @@ class GUI:
         self.labelPlayer1.place(x=400, y=75, width=50, height=70)
         self.labelPlayer1.create_image(0, 0, image = bg2, 
                         anchor = "nw")
+
+    # def playerMove(self, msg):
+    #     self.labelPlayer1.place(x=700, y=300, width=50, height=70)
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
@@ -276,6 +282,7 @@ class GUI:
                     client.send(self.name.encode(FORMAT))
                 elif message[:2] == 'MP':
                     print("Nailed it: " + message)
+                    self.labelPlayer1.place(x=700, y=300, width=50, height=70)
                 else:
                     # insert messages to text box
                     self.textCons.config(state = NORMAL)
