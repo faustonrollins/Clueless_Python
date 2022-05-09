@@ -114,7 +114,7 @@ class GUI:
         self.name = name
         # to show chat window
         self.Window.deiconify()
-        self.Window.title("CHATROOM")
+        self.Window.title("ClueX (Online)")
         self.Window.resizable(width = False,
                             height = False)
         self.Window.configure(width = 1000,
@@ -301,7 +301,7 @@ class GUI:
     def receive(self):
         original_player_positions = {1:[400,420], 2:[400,190], 3:[900,210], 4:[900,400]}
         room_positions = {"Hall":[650,125], "Lounge":[800,125], "Library":[475,250], 
-            "Kitchen":[750,500], "Billiard Room":[475,350], "Study":[475,100],
+            "Kitchen":[800,500], "Billiard Room":[475,350], "Study":[475,100],
             "Dining Room": [800,300], "Conservatory":[475,500], "Ballroom": [650,500]}
 
         while True:
@@ -351,7 +351,6 @@ class GUI:
         print("cows")
         msg_list = msg.split()
         if msg[0] == "@":
-            
             usr = msg_list[0][1:]
             if usr == self.name:
                 print("hi")

@@ -102,21 +102,6 @@ print("________________Setting up the Game Server__________________")
 # server_type = input("Choose the type of server...\n1.)Offline Server\n2.)Online Server\n")
 # if server_type == "1":
 server_type = "127.0.0.1"  # .................................................................Local host IP address.
-# elif server_type == "2":
-#     try:
-#         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#         server.connect(("8.8.8.8", 80))  # ..................................Using Google DNS -To get your IPV4 Address.
-#         server_type = server.getsockname()[0]
-#         print(f"Players can connect using: {server_type} address.")
-#         server.close()
-#     except Exception as online_error:
-#         print(f"{online_error}: Check your internet connection.")
-#         sys.exit(1)
-# else:
-#     print("Invalid option !")
-#     sys.exit(1)
-
-# n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
 n_players = 4
 if type(n_players) == int and 6 >= n_players >= 2:
     print("Waiting for players to join....")
@@ -234,15 +219,15 @@ def player_turn(nickname):
     player_id = members[nickname]
     temp_win = True
     player_id.send("---------------------------------------------------\n".encode("utf-8"))
-    player_id.send("Hit 'y' to Roll Dice..".encode("utf-8"))
+    player_id.send("Hit 'Enter' to Simulate a Turn..".encode("utf-8"))
     player_id.recv(1024).decode("utf-8")
     dice_count = dice_s()
     player_id.send("\n==============================".encode("utf-8"))
-    player_id.send(f"You have rolled: {dice_count}.".encode("utf-8"))
-    send_all(f"{nickname} rolled: {dice_count}", ex_id=player_id)
+    player_id.send(f"Points earned: {dice_count}.".encode("utf-8"))
+    send_all(f"{nickname} earned: {dice_count} points", ex_id=player_id)
     player_point[nickname] += dice_count
     if player_point[nickname] > 5 and player_point[nickname] < 9:
-        player_id.send("\nWant to enter in a room ? (y/n)".encode("utf-8"))
+        player_id.send("\nWant to enter the a room ? (y/n)".encode("utf-8"))
         choice = player_id.recv(1024).decode("utf-8")
         if choice[-1] == 'y':
             player_point[nickname] = 0
