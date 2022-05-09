@@ -20,9 +20,11 @@ import itertools
 players = []
 nicknames = []
 members = {}
+members_colors = {}
 players_deck = {}
 player_point = {}
 secret_deck = {}
+member_picker_counter = 1
 valid_name_pattern = r'[A-Za-z0-9-_]*'
 game_art1 = '''
 ==================================================================
@@ -162,7 +164,7 @@ def shuffle_cards(t_cards, num_players, players_nicknames):
 
 def player_nickname(player):
     """ Ask newly joined players to choose and nickname and checks if there is no same name collision."""
-
+    global member_picker_counter
     player.send("Please choose a nickname: ".encode("utf-8"))
     nickname = player.recv(1024).decode("utf-8")
     # while True:
@@ -177,6 +179,8 @@ def player_nickname(player):
         nickname = player.recv(1024).decode("utf-8")
     nicknames.append(nickname)
     members.update({nickname: player})
+    members_colors.update({nickname: suspects[member_picker_counter]})
+    member_picker_counter +=1
     player_point.update({nickname: 0})
     return nickname
 
@@ -234,8 +238,7 @@ def player_turn(nickname):
             while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
                 try:
                     room_no = int(player_id.recv(1024).decode("utf-8")[-1])
-                    # send_all(f"UPP GREEN MUSTARD\n")
-
+                    player_id.send(f"MP:{members_colors[nickname]}:{rooms[room_no]}".encode("utf-8"))
                 except Exception as e:
                     player_id.send("Invalid room selected!\n".encode("utf-8"))
                     print(f"Invalid Character Entered by user: {e}")

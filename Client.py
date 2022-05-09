@@ -239,16 +239,16 @@ class GUI:
         self.labelBoard.create_image(0, 0, image = bg, 
                         anchor = "nw")
 
-        # filename = "./tokens/green.png"
-        # pillow_image = Image.open(filename)
-        # pillow_image.thumbnail((50,50),Image.ANTIALIAS)
-        # bg = ImageTk.PhotoImage(pillow_image)
-        # self.Window.bg = bg  # to prevent the image garbage collected.
+        filename2 = "./tokens/Colonel Mustard.png"
+        pillow_image_2 = Image.open(filename2)
+        pillow_image_2.thumbnail((70,70),Image.ANTIALIAS)
+        bg2 = ImageTk.PhotoImage(pillow_image_2)
+        self.Window.bg2 = bg2  # to prevent the image garbage collected.
 
-        # self.labelPlayer1 = Canvas(self.Window)
-        # self.labelPlayer1.place(x=40, y=75, width=50, height=50)
-        # self.labelPlayer1.create_image(0, 0, image = bg, 
-        #                 anchor = "nw")
+        self.labelPlayer1 = Canvas(self.Window, borderwidth=2, background="red")
+        self.labelPlayer1.place(x=400, y=75, width=50, height=70)
+        self.labelPlayer1.create_image(0, 0, image = bg2, 
+                        anchor = "nw")
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
@@ -274,6 +274,8 @@ class GUI:
                 # if the messages from the server is NAME send the client's name
                 if message == 'NAME':
                     client.send(self.name.encode(FORMAT))
+                elif message[:2] == 'MP':
+                    print("Nailed it: " + message)
                 else:
                     # insert messages to text box
                     self.textCons.config(state = NORMAL)
@@ -282,12 +284,6 @@ class GUI:
                     
                     self.textCons.config(state = DISABLED)
                     self.textCons.see(END)
-                # if message[:3] == "UPP":
-                #     playerPiece = message.split(":")[1]
-                #     print(playerPiece)
-                #     boardRoom = message.split(":")[1]
-                #     print(boardRoom)
-                #     GUI.playerOnBoard(self, "green", "Ballroom")
 
             except:
                 # an error will be printed on the command line or console if there's an error
