@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import font
 from tkinter import ttk
 from PIL import ImageTk, Image
+import queue
 
 # import all functions /
 # everything from chat.py file
@@ -84,6 +85,9 @@ class GUI:
     def goAhead(self, name):
         self.login.destroy()
         self.layout(name)
+
+        chatRcv = threading.Thread(target = self.chatRecieve)
+        chatRcv.start()
         
         # the thread to receive messages
         rcv = threading.Thread(target=self.receive)
@@ -116,7 +120,7 @@ class GUI:
         self.Window.resizable(width = False,
                             height = False)
         self.Window.configure(width = 1000,
-                            height = 800,
+                            height = 840,
                             bg = "#17202A")
         self.labelHead = Label(self.Window,
                             bg = "#17202A",
@@ -150,10 +154,10 @@ class GUI:
         
         self.labelBottom = Label(self.Window,
                                 bg = "#ABB2B9",
-                                height = 80)
+                                height = 120)
         
         self.labelBottom.place(relwidth = 1,
-                            rely = 0.825)
+                            rely = 0.775)
         
         self.entryMsg = Entry(self.labelBottom,
                             bg = "#2C3E50",
@@ -163,7 +167,7 @@ class GUI:
         # place the given widget
         # into the gui window
         self.entryMsg.place(relwidth = 0.74,
-                            relheight = 0.06,
+                            relheight = 0.03,
                             rely = 0.008,
                             relx = 0.011)
         
@@ -179,10 +183,38 @@ class GUI:
         
         self.buttonMsg.place(relx = 0.77,
                             rely = 0.008,
-                            relheight = 0.06,
+                            relheight = 0.03,
                             relwidth = 0.22)
         
         self.textCons.config(cursor = "arrow")
+
+        # ###Chat
+        self.chatEntryMsg = Entry(self.labelBottom,
+                    bg = "#2C3E50",
+                    fg = "#EAECEE",
+                    font = "Helvetica 13")
+        
+        # # place the given widget
+        # # into the gui window
+        self.chatEntryMsg.place(relwidth = 0.74,
+                            relheight = 0.03,
+                            rely = 0.05,
+                            relx = 0.011)
+        
+        # # create a Send Button
+        self.chatButtonMsg = Button(self.labelBottom,
+                                text = "SEND CHAT",
+                                font = "Helvetica 10 bold",
+                                width = 20,
+                                bg = "#ABB2B9",
+                                command = lambda : self.sendChatButton(self.chatEntryMsg.get()))
+    
+        self.chatButtonMsg.place(relx = 0.77,
+                            rely = 0.05,
+                            relheight = 0.03,
+                            relwidth = 0.22)
+
+        # ###endChat
         
         # create a scroll bar
         scrollbar = Scrollbar(self.textCons)
@@ -226,6 +258,12 @@ class GUI:
         snd= threading.Thread(target = self.sendMessage)
         snd.start()
 
+    def sendChatButton(self, msg):
+        self.chatMsg=msg
+        self.chatEntryMsg.delete(0, END)
+        chatSnd= threading.Thread(target = self.chatSendMessage)
+        chatSnd.start()
+
 
     # function to receive messages
     def receive(self):
@@ -256,7 +294,58 @@ class GUI:
                 print("An error occured!")
                 client.close()
                 break
-        
+
+    def new_chat(msg):
+        print("cows")
+        msg_list = msg.split()
+        if msg[0] == "@":
+            
+            usr = msg_list[0][1:]
+            if usr == self.name:
+                print("hi")
+                self.textCons.config(state = NORMAL)
+                self.textCons.insert(END,
+                                    msg_list[-1] + ": " + " ".join(msg_list[1:-1]) + "\n\n")
+                
+                self.textCons.config(state = DISABLED)
+                self.textCons.see(END)
+        else:
+            self.textCons.config(state = NORMAL)
+            self.textCons.insert(END,
+                               msg_list[-1] + ": " + " ".join(msg_list[0:-1])+"\n\n")
+            
+            self.textCons.config(state = DISABLED)
+            self.textCons.see(END)
+
+    def chatRecieve(self):
+        lastChat = ""
+        with open('chat.txt') as f:
+            while True:
+                try:
+                    line = f.readlines()[-1]
+                    if line != lastChat:
+                        msg=line
+                        msg_list = line.split()
+                        if msg[0] == "@":
+                            
+                            usr = msg_list[0][1:]
+                            if usr == self.name:
+                                self.textCons.config(state = NORMAL)
+                                self.textCons.insert(END,
+                                                    msg_list[-1] + ": " + " ".join(msg_list[1:-1]) + "\n\n")
+                                
+                                self.textCons.config(state = DISABLED)
+                                self.textCons.see(END)
+                        else:
+                            self.textCons.config(state = NORMAL)
+                            self.textCons.insert(END,
+                                            msg_list[-1] + ": " + " ".join(msg_list[0:-1])+"\n\n")
+                            
+                            self.textCons.config(state = DISABLED)
+                            self.textCons.see(END)
+                        lastChat = line
+                except:
+                    pass
     # function to send messages
     def sendMessage(self):
         self.textCons.config(state=DISABLED)
@@ -264,6 +353,13 @@ class GUI:
             message = (f"{self.name}: {self.msg}")
             client.send(message.encode(FORMAT))
             break
+
+    def chatSendMessage(self):
+        with open("chat.txt", "a") as chatfile:
+            chatfile.write(self.chatMsg + " " + self.name + "\n")
+
+
+
 
 # create a GUI class object
 g = GUI()
