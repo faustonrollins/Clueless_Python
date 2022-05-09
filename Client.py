@@ -34,39 +34,54 @@ class GUI:
         # login window
         self.login = Toplevel()
         # set the title
-        self.login.title("Login")
+        self.login.title("Find a Game Server")
         self.login.resizable(width = False,
                             height = False)
-        self.login.configure(width = 400,
-                            height = 300)
+        self.login.configure(width = 500,
+                            height = 500)
         # create a Label
         self.pls = Label(self.login,
-                    text = "Please login to continue",
+                    text = "Pick an Active Game Server",
                     justify = CENTER,
                     font = "Helvetica 14 bold")
         
-        self.pls.place(relheight = 0.15,
-                    relx = 0.2,
-                    rely = 0.07)
+        self.pls.place(x = 100,y = 20)
         
         # create a Label
+ 
+        self.labelName5 = Label(self.login,
+                            text = "Game                 Players     ServerID",
+                            font = "Helvetica 10")
+        
         self.labelName = Label(self.login,
-                            text = "Name: ",
-                            font = "Helvetica 12")
+                            text = "Clue Game (Mods)          4       169.1.0.1",
+                            font = "Helvetica 10")
         
-        self.labelName.place(relheight = 0.2,
-                            relx = 0.1,
-                            rely = 0.2)
+        self.labelName2 = Label(self.login,
+                            text = "Clue Game (Mods)          3       254.0.0.1",
+                            font = "Helvetica 10")
+
+        self.labelName3 = Label(self.login,
+                            text = "Clue Game (No Mods)     3       127.0.11.1",
+                            font = "Helvetica 10")
+
+        self.labelName4 = Label(self.login,
+                            text = "Clue Game (Creative)     4       210.0.7.1",
+                            font = "Helvetica 10")
         
+        self.labelName5.place(x = 100, y = 50)
+        self.labelName.place(x = 100, y = 100)
+        self.labelName2.place(x = 100, y = 150)
+        self.labelName3.place(x = 100, y = 200)
+        self.labelName4.place(x = 100, y = 250)
+
         # create a entry box for
         # tyoing the message
         self.entryName = Entry(self.login,
                             font = "Helvetica 14")
         
-        self.entryName.place(relwidth = 0.4,
-                            relheight = 0.12,
-                            relx = 0.35,
-                            rely = 0.2)
+        self.entryName.place(x = 100, y = 300)
+
         
         # set the focus of the cursor
         self.entryName.focus()
@@ -74,12 +89,12 @@ class GUI:
         # create a Continue Button
         # along with action
         self.go = Button(self.login,
-                        text = "CONTINUE",
+                        text = "LOGIN",
                         font = "Helvetica 14 bold",
                         command = lambda: self.goAhead(self.entryName.get()))
         
         self.go.place(relx = 0.4,
-                    rely = 0.55)
+                    y = 400)
         self.Window.mainloop()
 
     def goAhead(self, name):
@@ -92,23 +107,6 @@ class GUI:
         # the thread to receive messages
         rcv = threading.Thread(target=self.receive)
         rcv.start()
-
-
-    # def playerOnBoard(self, playerPiece, boardRoom):
-    #     if boardRoom == "Ballroom":
-    #         x = 50
-    #         y = 50
-    #     else:
-    #         x = 0
-    #         y = 10
-    #     filename = "./token/" + playerPiece + ".png"
-    #     pillow_image = Image.open(filename)
-    #     pillow_image.thumbnail((50,50),Image.ANTIALIAS)
-    #     bg = ImageTk.PhotoImage(pillow_image)
-    #     self.labelPlayer1 = Canvas(self.Window)
-    #     self.labelPlayer1.place(x=40, y=75, width=50, height=50)
-    #     self.labelPlayer1.create_image(0, 0, image = bg, 
-    #                     anchor = "nw")
 
     # The main layout of the chat
     def layout(self,name):
@@ -144,11 +142,11 @@ class GUI:
                             height = 2,
                             bg = "#17202A",
                             fg = "#EAECEE",
-                            font = "Helvetica 14",
+                            font = "Helvetica 10",
                             padx = 5,
                             pady = 5)
         
-        self.textCons.place(relheight = 0.745,
+        self.textCons.place(relheight = 0.735,
                             relwidth = .35,
                             rely = 0.08)
         
@@ -240,18 +238,46 @@ class GUI:
                         anchor = "nw")
 
 
+        #Load in all of the players (four)
+        filename_mustard = "./tokens/Colonel Mustard.png"
+        filename_plum = "./tokens/Professor Plum.png"
+        filename_green = "./tokens/Reverend Green.png"
+        filename_white = "./tokens/Mrs. White.png"
 
+        pillow_image_1 = Image.open(filename_mustard)
+        pillow_image_2 = Image.open(filename_plum)
+        pillow_image_3 = Image.open(filename_green)
+        pillow_image_4 = Image.open(filename_white)
 
-        filename2 = "./tokens/Colonel Mustard.png"
-        pillow_image_2 = Image.open(filename2)
+        pillow_image_1.thumbnail((70,70),Image.ANTIALIAS)
         pillow_image_2.thumbnail((70,70),Image.ANTIALIAS)
+        pillow_image_3.thumbnail((70,70),Image.ANTIALIAS)
+        pillow_image_4.thumbnail((70,70),Image.ANTIALIAS)
+
+        bg1 = ImageTk.PhotoImage(pillow_image_1)
         bg2 = ImageTk.PhotoImage(pillow_image_2)
+        bg3 = ImageTk.PhotoImage(pillow_image_3)
+        bg4 = ImageTk.PhotoImage(pillow_image_4)
+
+        self.Window.bg1 = bg1  # to prevent the image garbage collected.
         self.Window.bg2 = bg2  # to prevent the image garbage collected.
+        self.Window.bg3 = bg3  # to prevent the image garbage collected.
+        self.Window.bg4 = bg4  # to prevent the image garbage collected.
 
         self.labelPlayer1 = Canvas(self.Window, borderwidth=2, background="red")
+        self.labelPlayer2 = Canvas(self.Window, borderwidth=2, background="red")
+        self.labelPlayer3 = Canvas(self.Window, borderwidth=2, background="red")
+        self.labelPlayer4 = Canvas(self.Window, borderwidth=2, background="red")
+
         self.labelPlayer1.place(x=400, y=75, width=50, height=70)
-        self.labelPlayer1.create_image(0, 0, image = bg2, 
-                        anchor = "nw")
+        self.labelPlayer2.place(x=400, y=95, width=50, height=70)
+        self.labelPlayer3.place(x=400, y=105, width=50, height=70)
+        self.labelPlayer4.place(x=400, y=125, width=50, height=70)
+
+        self.labelPlayer1.create_image(0, 0, image = bg1, anchor = "nw")
+        self.labelPlayer2.create_image(0, 0, image = bg2, anchor = "nw")
+        self.labelPlayer3.create_image(0, 0, image = bg3, anchor = "nw")
+        self.labelPlayer4.create_image(0, 0, image = bg4, anchor = "nw")
 
     # def playerMove(self, msg):
     #     self.labelPlayer1.place(x=700, y=300, width=50, height=70)
@@ -273,6 +299,11 @@ class GUI:
 
     # function to receive messages
     def receive(self):
+        original_player_positions = {1:[400,420], 2:[400,190], 3:[900,210], 4:[900,400]}
+        room_positions = {"Hall":[650,125], "Lounge":[800,125], "Library":[475,250], 
+            "Kitchen":[750,500], "Billiard Room":[475,350], "Study":[475,100],
+            "Dining Room": [800,300], "Conservatory":[475,500], "Ballroom": [650,500]}
+
         while True:
             try:
                 message = client.recv(1024).decode(FORMAT)
@@ -280,9 +311,27 @@ class GUI:
                 # if the messages from the server is NAME send the client's name
                 if message == 'NAME':
                     client.send(self.name.encode(FORMAT))
+                
                 elif message[:2] == 'MP':
-                    print("Nailed it: " + message)
-                    self.labelPlayer1.place(x=700, y=300, width=50, height=70)
+                    generic , playerPiece, roomPlace = message.split(":")[0],message.split(":")[1],message.split(":")[2]
+                    
+                    if playerPiece == "Colonel Mustard":
+                        self.labelPlayer1.place(x=room_positions[roomPlace][0], y=room_positions[roomPlace][1], width=50, height=70)
+
+                    elif playerPiece == "Professor Plum":
+                        self.labelPlayer2.place(x=room_positions[roomPlace][0], y=room_positions[roomPlace][1], width=50, height=70)
+                    
+                    elif playerPiece == "Reverend Green":
+                        self.labelPlayer3.place(x=room_positions[roomPlace][0], y=room_positions[roomPlace][1], width=50, height=70)
+
+                    else:
+                        self.labelPlayer4.place(x=room_positions[roomPlace][0], y=room_positions[roomPlace][1], width=50, height=70)
+
+                elif message[:2] == 'SC':
+                    self.labelPlayer1.place(x=original_player_positions[1][0], y=original_player_positions[1][1], width=50, height=70)
+                    self.labelPlayer2.place(x=original_player_positions[2][0], y=original_player_positions[2][1], width=50, height=70)
+                    self.labelPlayer3.place(x=original_player_positions[3][0], y=original_player_positions[3][1], width=50, height=70)
+                    self.labelPlayer4.place(x=original_player_positions[4][0], y=original_player_positions[4][1], width=50, height=70)
                 else:
                     # insert messages to text box
                     self.textCons.config(state = NORMAL)

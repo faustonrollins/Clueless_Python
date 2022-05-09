@@ -27,24 +27,34 @@ secret_deck = {}
 member_picker_counter = 1
 valid_name_pattern = r'[A-Za-z0-9-_]*'
 game_art1 = '''
-==================================================================
-Welcome to the classic detective game: 
-==================================================================
+=================================================
+Welcome to ClueX, A modified Clue Detective Game
+=================================================
 '''
 game_art2 = '''
- .d8888b.     888                                 888              
-d88P  Y88b    888                                 888              
-888    888    888                                 888             
-888           888    888  888     .d88b.      .d88888     .d88b.  
-888           888    888  888    d8P  Y8b    d88" 888    d88""88b 
-888    888    888    888  888    88888888    888  888    888  888 
-Y88b  d88P    888    Y88b 888    Y8b.        Y88b 888    Y88..88P 
- "Y8888P"     888     "Y88888     "Y8888      "Y88888     "Y88P" 
+                                                                                                                                              
+                                                
+                                                           
+            ,--,                            ,--,     ,--,  
+          ,--.'|                            |'. \   / .`|  
+          |  | :            ,--,            ; \ `\ /' / ;  
+          :  : '          ,'_ /|            `. \  /  / .'  
+   ,---.  |  ' |     .--. |  | :    ,---.    \  \/  / ./   
+  /     \ '  | |   ,'_ /| :  . |   /     \    \  \.'  /    
+ /    / ' |  | :   |  ' | |  . .  /    /  |    \  ;  ;     
+.    ' /  '  : |__ |  | ' |  | | .    ' / |   / \  \  \    
+'   ; :__ |  | '.'|:  | : ;  ; | '   ;   /|  ;  /\  \  \   
+'   | '.'|;  :    ;'  :  `--'   \'   |  / |./__;  \  ;  \  
+|   :    :|  ,   / :  ,      .-./|   :    ||   : / \  \  ; 
+ \   \  /  ---`-'   `--`----'     \   \  / ;   |/   \  ' | 
+  `----'                           `----'  `---'     `--`  
+                                                           
+
  '''
 game_art3 = '''
-==================================================================
+===============================
 Let the investigation begin...
-==================================================================
+===============================
  
 '''
 option_table = """  
@@ -67,6 +77,9 @@ room_table = """
 ||  4.) Kitchen        ||
 ||  5.) Billiard Room  ||
 ||  6.) Study          ||
+||  7.) Dining Room    ||
+||  8.) Conservatory   ||
+||  9.) Ballroom       ||
 =========================
 """
 suggestion = '''
@@ -79,11 +92,11 @@ suggestion = '''
 cards = [["Colonel Mustard", "Professor Plum", "Reverend Green", "Mrs. Peacock", "Mrs. White", "Miss Scarlett"],
          ["Dagger", "Candlestick", "Revolver", "Rope", "Lead piping", "Spanner"], ["Hall", "Study",
                                                                                    "Billiard Room", "Lounge", "Library",
-                                                                                   "Kitchen"]]
+                                                                                   "Kitchen", "Dining Room", "Conservatory", "Ballroom"]]
 suspects = {1: "Colonel Mustard", 2: "Professor Plum", 3: "Reverend Green", 4: "Mrs. Peacock", 5: "Miss Scarlett",
             6: "Mrs. White"}
 weapon = {1: "Dagger", 2: "Candlestick", 3: "Revolver", 4: "Rope", 5: "Lead piping", 6: "Spanner"}
-rooms = {1: "Hall", 2: "Lounge", 3: "Library", 4: "Kitchen", 5: "Billiard Room", 6: "Study"}
+rooms = {1: "Hall", 2: "Lounge", 3: "Library", 4: "Kitchen", 5: "Billiard Room", 6: "Study", 7: "Dining Room", 8: "Conservatory", 9: "Ballroom"}
 
 print("________________Setting up the Game Server__________________")
 # server_type = input("Choose the type of server...\n1.)Offline Server\n2.)Online Server\n")
@@ -104,7 +117,7 @@ server_type = "127.0.0.1"  # ...................................................
 #     sys.exit(1)
 
 # n_players = int(input("Enter the number of players (2-6)\n(Least 3 players are recommended)\n"))
-n_players = 2
+n_players = 4
 if type(n_players) == int and 6 >= n_players >= 2:
     print("Waiting for players to join....")
 else:
@@ -202,6 +215,7 @@ def accept_requests():
     send_all("...")
     time.sleep(2)
     send_all("...")
+    send_all(f"SC:Dealing Cards")
     time.sleep(2)
     send_all(game_art1)
     time.sleep(2)
@@ -223,11 +237,11 @@ def player_turn(nickname):
     player_id.send("Hit 'y' to Roll Dice..".encode("utf-8"))
     player_id.recv(1024).decode("utf-8")
     dice_count = dice_s()
-    player_id.send("\n=============================================".encode("utf-8"))
+    player_id.send("\n==============================".encode("utf-8"))
     player_id.send(f"You have rolled: {dice_count}.".encode("utf-8"))
     send_all(f"{nickname} rolled: {dice_count}", ex_id=player_id)
     player_point[nickname] += dice_count
-    if player_point[nickname] > 7 and player_point[nickname] < 9:
+    if player_point[nickname] > 5 and player_point[nickname] < 9:
         player_id.send("\nWant to enter in a room ? (y/n)".encode("utf-8"))
         choice = player_id.recv(1024).decode("utf-8")
         if choice[-1] == 'y':
@@ -235,7 +249,7 @@ def player_turn(nickname):
             player_id.send(room_table.encode("utf-8"))
             player_id.send("\nChoose a room to enter: ".encode("utf-8"))
             room_no = 0
-            while room_no > 6 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
+            while room_no > 8 or room_no < 1 or type(room_no) != int:  # .......... To check if entered option is valid.
                 try:
                     room_no = int(player_id.recv(1024).decode("utf-8")[-1])
                     send_all(f"MP:{members_colors[nickname]}:{rooms[room_no]}")
@@ -296,12 +310,12 @@ def player_turn(nickname):
             pass
 
     elif player_point[nickname] > 8:
-        room_no = random.randint(1,6)
+        room_no = random.randint(1,8)
         diagonal_room = rooms[room_no]
         player_id.send(("\nEnter room: %s?" % diagonal_room).encode("utf-8"))
         room_choice = player_id.recv(1024).decode("utf-8")
-        send_all(f"MP:{members_colors[nickname]}:{room_choice}")
         if room_choice[-1] == 'y':
+            send_all(f"MP:{members_colors[nickname]}:{diagonal_room}")
             player_point[nickname] = 0
             player_id.send("\nChoose Suspect and Weapon. (separated by space)".encode("utf-8"))
             time.sleep(0.5)
@@ -364,7 +378,7 @@ def show_player_detail():
         player_id = members[name]
         point = player_point[name]
         deck = players_deck[name]
-        player_id.send("\n=============================================\n".encode("utf-8"))
+        player_id.send("\n=======================================\n".encode("utf-8"))
         player_id.send(f"Your Cards: {deck}\nYour points: {point}\n\n".encode("utf-8"))
 
 
